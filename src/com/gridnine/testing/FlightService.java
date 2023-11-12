@@ -2,12 +2,10 @@ package com.gridnine.testing;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class FlightService {
+
     /**
      * Список всех перелётов
      *
@@ -25,16 +23,18 @@ public class FlightService {
      * @param airTravel
      */
 
-    public static void flightsWithoutFlightDepartingInThePast(List<Flight> airTravel) {
+    public static List<Flight> flightsWithoutFlightDepartingInThePast(List<Flight> airTravel) {
 
         List<Flight> newFlightList = new ArrayList<>();
-        System.out.println("\n **************** Список без перелёта с вылетом в прошлом  ******************** \n");
+        System.out.println("\n **************** Список без перелётов с вылетом в прошлом  ******************** \n");
         for (Flight flight : airTravel) {
-            if (flight.getSegments().get(0).getDepartureDate().isAfter(LocalDateTime.now())) {
+            if (flight.getSegments().stream().allMatch(segment -> segment.getDepartureDate()
+                    .isAfter(LocalDateTime.now()))) {
                 newFlightList.add(flight);
             }
         }
         newFlightList.forEach(System.out::println);
+        return newFlightList;
     }
 
     /**
@@ -43,19 +43,20 @@ public class FlightService {
      * @param airTravel
      */
 
-    public static void flightsWithoutFlightWereArrivalBeforeDeparture(List<Flight> airTravel) {
-        Set<Flight> newFlightList = new HashSet<>();
-        System.out.println("\n **************** Список без перелёта с прилётом раньше вылета  ***************\n");
+    public static List<Flight> flightsWithoutFlightWereArrivalBeforeDeparture(List<Flight> airTravel) {
+        List<Flight> newFlightList = new ArrayList<>();
+        System.out.println("\n **************** Список без перелётов с прилётом раньше вылета  ***************\n");
 
         for (Flight flight : airTravel) {
-            for (Segment segment : flight.getSegments()) {
-                if (segment.getDepartureDate().isBefore(segment.getArrivalDate())) {
-                    newFlightList.add(flight);
-                }
+            if (flight.getSegments().stream().allMatch(segment -> segment.getDepartureDate()
+                    .isBefore(segment.getArrivalDate()))) {
+                newFlightList.add(flight);
             }
         }
         newFlightList.forEach(System.out::println);
+        return newFlightList;
     }
+
 
     /**
      * Список перелётов, в котором общее время пересадок не превышает двух часов
@@ -63,31 +64,40 @@ public class FlightService {
      * @param airTravel
      */
 
-    public static void flightsWithoutFlightWereTransferMoreThanTwoHours(List<Flight> airTravel) {
-        Set<Flight> newFlightList = new HashSet<>();
-        long sum = 0;
-        System.out.println("\n ****** Список без перелёта, в котором пересадка длится менее 2-х часов  ********* \n");
+    public static List<Flight> flightsWithoutFlightWereTransferMoreThanTwoHours(List<Flight> airTravel) {
+        System.out.println("\n ****** Список без перелётов, в которых общее время пересадок длится более 2-х часов  ********* \n");
+        List<Flight> newFlightList = new ArrayList<>();
+
         for (Flight flight : airTravel) {
-            for (int i = 0; i < flight.getSegments().size() - 1; i++) {
-                var duration = Duration.between(flight.getSegments().get(i).getArrivalDate(), (flight.getSegments().get(i + 1).getDepartureDate())).toHours();
-                sum = sum + duration;
-                if (sum < 2) {
-                    newFlightList.add(flight);
+            long sum = 0;
+            for (int i = 0; i < flight.getSegments().size()-1; i++) {
+               long  duration = Duration.between(flight.getSegments().get(i).getArrivalDate(),
+                        (flight.getSegments().get(i+1).getDepartureDate())).toHours();
+                sum += duration;
                 }
+            if (sum < 2 && flight.getSegments().size() > 1 ) {
+                    newFlightList.add(flight);
             }
         }
         newFlightList.forEach(System.out::println);
-        flightsWithoutFlightWereTransferMoreThanTwoHoursAndWithoutTransfers(airTravel);
+        return newFlightList;
     }
 
-    private static void flightsWithoutFlightWereTransferMoreThanTwoHoursAndWithoutTransfers(List<Flight> airTravel) {
+    /**
+     * Список перелётов без пересадок
+     *
+     * @param airTravel
+     */
+    public static List<Flight> flightsWithoutFlightsTransferWithoutTransfers(List<Flight> airTravel) {
         Set<Flight> newFlightList = new HashSet<>();
+        System.out.println("\n ****** Список без перелётов без пересадок  ********* \n");
         for (Flight flight : airTravel) {
-            for (int i = 0; i < flight.getSegments().size(); i++) {
-                if (flight.getSegments().size() == 1) {
-                    newFlightList.add(flight);
-                }
+
+            if (flight.getSegments().size() == 1) {
+                newFlightList.add(flight);
             }
-        } newFlightList.forEach(System.out::println);
+        }
+        newFlightList.forEach(System.out::println);
+        return newFlightList.stream().toList();
     }
 }
