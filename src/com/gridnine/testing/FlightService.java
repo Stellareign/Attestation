@@ -11,12 +11,12 @@ public class FlightService {
     /**
      * Список всех перелётов
      *
-     * @param airTravel
+     * @param allAirTravel
      */
 
-    public static void allFlightsList(List<Flight> airTravel) {
+    public static void allFlightsList(List<Flight> allAirTravel) {
         System.out.println("\n *********************** Список всех перелётов  ****************************** \n");
-        airTravel.forEach(System.out::println);
+        allAirTravel.forEach(System.out::println);
     }
 
     /**
@@ -55,7 +55,6 @@ public class FlightService {
             }
         }
         newFlightList.forEach(System.out::println);
-
     }
 
     /**
